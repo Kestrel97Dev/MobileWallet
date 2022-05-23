@@ -1,8 +1,11 @@
+import 'package:billeteraflutter/src/bloc/principal_bloc.dart';
 import 'package:billeteraflutter/src/bloc/usuario_bloc.dart';
+import 'package:billeteraflutter/src/models/principal_model.dart';
 import 'package:billeteraflutter/src/models/usuario_model.dart';
 import 'package:billeteraflutter/src/ui/usuarios/editar.dart';
 import 'package:billeteraflutter/src/ui/utilidades.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'dart:developer';
 
@@ -15,9 +18,12 @@ class PrincipalScreen extends StatefulWidget {
 
 class _PrincipalScreemState extends State<PrincipalScreen> {
   final UsuariosBloc usuarioBloc = UsuariosBloc();
+  final PrincipalBloc principalBloc = PrincipalBloc();
   Usuario? _usuario;
+  Principal? _principal;
   bool formModalEdited = false;
   Utilidades utilidades = Utilidades();
+  var f = NumberFormat("#,###");
 
   @override
   Widget build(BuildContext context) {
@@ -92,8 +98,12 @@ class _PrincipalScreemState extends State<PrincipalScreen> {
                     ),
                   ),
                   SizedBox(height: size.height * 0.1),
-                  const Expanded(
-                    child: Text("aqui el resto"),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        getSumatorias(),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -108,4 +118,84 @@ class _PrincipalScreemState extends State<PrincipalScreen> {
     );
   }
 
+  getSumatorias() {
+    return FutureBuilder<Principal?>(
+      future: principalBloc.getPrincipal(),
+      builder: (context, snapshot) {
+        Size size = MediaQuery.of(context).size;
+        if (snapshot.connectionState == ConnectionState.done) {
+          _principal = snapshot.data!;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.open_in_new_outlined,
+                        color: Colors.green,
+                        size: 30.0,
+                      ),
+                      SizedBox(width: size.width * 0.01),
+                    ],
+                  ),
+                  Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Text(
+                      "Ingresos",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      f.format(_principal!.sumatoriaIngresos!),
+                      style: const TextStyle(color: Colors.green),
+                    ),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.south_east_sharp,
+                        color: Colors.red,
+                        size: 30.0,
+                      ),
+                      SizedBox(width: size.width * 0.01),
+                    ],
+                  ),
+                  Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Text(
+                      "Gastos",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      f.format(_principal!.sumatoriaGastos!),
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  )
+                ],
+              ),
+            ],
+          );
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+  }
 }
